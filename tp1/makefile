@@ -1,26 +1,30 @@
-.PHONY: run build info rebuild clean create
+.PHONY: run build info rebuild clean test
 
 ARGS = $(filter-out $@,$(MAKECMDGOALS))
 
 #-------------------------------------------------------------------------------
 build:
-	@./src/main/build.sh $ARGS
+	@bash ./src/main/build.sh $(ARGS)
 
 #-------------------------------------------------------------------------------
 rebuild:
-	@./src/main/rebuild.sh $ARGS
+	@bash ./src/main/rebuild.sh $(ARGS)
 
 #-------------------------------------------------------------------------------
 run:
-	@./src/main/run.sh $ARGS
+	@bash ./src/main/run.sh $(ARGS)
 
 #-------------------------------------------------------------------------------
 clean:
-	@./src/main/clean.sh $ARGS
+	@bash ./src/main/clean.sh $(ARGS)
 
 #-------------------------------------------------------------------------------
 info:
-	@./src/main/info.sh $ARGS
+	@bash ./src/main/info.sh $(ARGS)
+
+#-------------------------------------------------------------------------------
+test:
+	@bash ./src/test/test.sh $(ARGS)
 
 #-------------------------------------------------------------------------------
 %:
