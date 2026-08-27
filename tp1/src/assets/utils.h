@@ -56,7 +56,7 @@ void initThread(pthread_t *threadLocal, void *threadFunction(void *arg), void* a
 pthread_t *initThreadArray(int size_arr) {
     pthread_t *threads;
 
-    if((threads = malloc(sizeof(pthread_t) * size_arr)) == NULL) {
+    if((threads = (pthread_t *)malloc(sizeof(pthread_t) * size_arr)) == NULL) {
         puts("\033[31mNão foi possível inicializar o array de threads [initThreadArray L4]\033[m");
         exit(-34);
     }

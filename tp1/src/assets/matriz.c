@@ -2,7 +2,7 @@
     gcc -o matriz matriz.c ../utils.c -ansi -pedantic -Wall
 */
 
-#include "../progConc.h"
+#include "../include/progConc.h"
 
 int main(int argc, char **argv) {
     int N, M;
