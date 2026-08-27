@@ -1,29 +1,27 @@
-arg1 := $(word 1, $(MAKECMDGOALS))
-arg2 := $(word 2, $(MAKECMDGOALS))
-arg3 := $(word 3, $(MAKECMDGOALS))
-arg4 := $(word 4, $(MAKECMDGOALS))
+.PHONY: run build info rebuild clean create
 
-.PHONY: all matriz seq
+ARGS = $(filter-out $@,$(MAKECMDGOALS))
 
-all: matriz.c seq.c ../utils.c
-	gcc -o matriz.o matriz.c ../utils.c -ansi -pedantic -Wall
-	gcc -o seq.o seq.c ../utils.c -ansi -pedantic -Wall
-	gcc -o conc.o conc.c ../utils.c -ansi -pedantic -Wall
+#-------------------------------------------------------------------------------
+build:
+	@./src/main/build.sh $ARGS
 
-matriz:
-	./matriz.o $(arg2) $(arg3) $(arg4)
+#-------------------------------------------------------------------------------
+rebuild:
+	@./src/main/rebuild.sh $ARGS
 
-seq:
-	./seq.o mat$(arg2).bin mat$(arg3).bin matSeq.bin
+#-------------------------------------------------------------------------------
+run:
+	@./src/main/run.sh $ARGS
 
-conc:
-	./conc.o $(arg2) mat$(arg3).bin mat$(arg4).bin matConc.bin
+#-------------------------------------------------------------------------------
+clean:
+	@./src/main/clean.sh $ARGS
 
-mat:
-	./matriz.o $(arg3) $(arg3) mat$(arg2).bin
+#-------------------------------------------------------------------------------
+info:
+	@./src/main/info.sh $ARGS
 
+#-------------------------------------------------------------------------------
 %:
 	@:
-
-clean:
-	rm -r *.o *.bin
