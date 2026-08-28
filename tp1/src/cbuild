@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+RELATIVE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ARGS=${@:2}
+
+case "$1" in
+    build)
+        echo "comando build"
+    ;;
+    clean)
+        echo "comando clean"
+    ;;
+    test)
+        bash "${RELATIVE_DIR}/tests/test.sh" $ARGS
+    ;;
+    *)
+        echo "Uso: cbuild {build|clean}"
+        exit 1
+    ;;
+esac

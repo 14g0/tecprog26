@@ -8,9 +8,9 @@ imprimirComandos() {
     if [[ -z "$2" ]]; then
         cat <<EOF
 Comandos disponíveis:
-    create template|completo <nome_projeto> <diretório> : Cria um template de projeto com o nome fornecido.
+    create -t|-c <nome_projeto> <diretório> : Cria um template de projeto com o nome fornecido.
     clean  <nome_projeto> <diretório>                   : Remove o template de projeto do diretório especificado.
-    help <comando>                                      : Exibe informações detalhadas sobre o comando fornecido.
+    help   <comando>                                    : Exibe informações detalhadas sobre o comando fornecido.
 EOF
     else
         if [[ "$COMANDOS" == *"$2"* ]]; then
@@ -18,8 +18,8 @@ EOF
                 "create")
                     cat <<EOF
     Comando: create
-    -template                             : Cria um template de projeto, com arquivos sem conteúdo.
-    -completo <nome_projeto> <diretório>  : Cria um projeto com o nome fornecido, no diretório especificado.
+    -t                             : Cria um template de projeto, com arquivos sem conteúdo.
+    -c <nome_projeto> <diretório>  : Cria um projeto com o nome fornecido, no diretório especificado.
 EOF
                 ;;
                 *)
@@ -57,7 +57,7 @@ criarProjeto() {
     fi
 
     case "$2" in
-        "template")
+        "-t")
             if touch \
                 "$pathCompleto/src/main.c" \
                 "$pathCompleto/tests/test.c" \
@@ -71,7 +71,7 @@ criarProjeto() {
                 return 1
             fi
         ;;
-        "completo")
+        "-c")
             for arquivo in ./src/assets/*; do
                 case "$arquivo" in
                     */test*)
@@ -111,12 +111,12 @@ criarProjeto() {
 
 verificarTipoDeProjeto() {
     case "$2" in
-        template|completo)
+        -t|-c)
             echo "Criando projeto ${3:-template} ${4:+ no diretório $4}..."
             criarProjeto "$@"
         ;;
         *)
-            printf "Argumento desconhecido.\nUse \033[33m teste --help create\033[m para ver os comandos disponíveis\n"
+            printf "Argumento desconhecido.\nUse \033[33m teste help create\033[m para ver os comandos disponíveis\n"
             return 1
         ;;
     esac
