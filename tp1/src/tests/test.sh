@@ -8,18 +8,17 @@ imprimirComandos() {
     if [[ -z "$2" ]]; then
         cat <<EOF
 Comandos disponíveis:
-    create -t|-c <nome_projeto> <diretório> : Cria um template de projeto com o nome fornecido.
-    clean  <nome_projeto> <diretório>                   : Remove o template de projeto do diretório especificado.
-    help   <comando>                                    : Exibe informações detalhadas sobre o comando fornecido.
+    -create <diretório> : Cria um template de projeto com o nome fornecido.
+    -clean  <diretório> : Remove o template de projeto do diretório especificado.
+    -help   <comando>   : Exibe informações detalhadas sobre o comando fornecido.
 EOF
     else
         if [[ "$COMANDOS" == *"$2"* ]]; then
             case "$2" in
                 "create")
                     cat <<EOF
-    Comando: create
-    -t                             : Cria um template de projeto, com arquivos sem conteúdo.
-    -c <nome_projeto> <diretório>  : Cria um projeto com o nome fornecido, no diretório especificado.
+Comando: create
+    -create <nome_projeto> <diretório>  : Cria um projeto com o nome fornecido, no diretório especificado.
 EOF
                 ;;
                 *)
@@ -36,18 +35,14 @@ EOF
 #-------------------------------------------------------------------------------
 
 criarProjeto() {
-    local opcoesDisponiveis="completo template"
-    if [[ ! "$opcoesDisponiveis" == *"$2" ]]; then
-        printf "\033[31mOpção inválida para o comando create\033[m\n"
-        return 1
-    fi
+    echo "Criando projeto em ${2:-template}..."
+    local pathBase="${2:-./template}"
 
-    local pathCompleto="${4:-.}/${3:-template}"
     if mkdir -p \
-        "$pathCompleto/src" \
-        "$pathCompleto/tests" \
-        "$pathCompleto/include" \
-        "$pathCompleto/docs";
+        "$pathBase/src" \
+        "$pathBase/tests" \
+        "$pathBase/include" \
+        "$pathBase/docs";
     then
         printf "\033[32m    -Diretórios criados com sucesso\033[m\n"
     else
@@ -55,71 +50,57 @@ criarProjeto() {
         printf "Abortando operação.\033[m\n"
         return 1
     fi
-
-    case "$2" in
-        "-t")
+    
+    if [[ -z "$2" ]];
+        then
             if touch \
-                "$pathCompleto/src/main.c" \
-                "$pathCompleto/tests/test.c" \
-                "$pathCompleto/include/main.h" \
-                "$pathCompleto/docs/README.md";
-            then
-                printf "\033[32m    -Arquivos template criados com sucesso nas pastas\033[m\n"
-                return 0
-            else
-                printf "\033[31mNão foi possível criar todos os arquivos template\033[m\n"
-                return 1
+                "$pathBase/src/main.c" \
+                "$pathBase/tests/test.c" \
+                "$pathBase/include/main.h" \
+                "$pathBase/docs/README.md";
+                then
+                    printf "\033[32m    -Arquivos template criados com sucesso nas pastas\033[m\n"
+                    return 0
+                else
+                    printf "\033[31mNão foi possível criar todos os arquivos template\033[m\n"
+                    return 1
             fi
-        ;;
-        "-c")
-            for arquivo in ./src/assets/*; do
+        else
+            for arquivo in "$CBUILD_ASSETS"/*; do
                 case "$arquivo" in
                     */test*)
-                        if ! cp -a "$arquivo" "$pathCompleto/tests/";
-                        then
-                            printf "\033[31mNão foi possível copiar o arquivo $arquivo\033[m\n"
-                            echo "Abortando operação."
-                            return 1
+                        if ! cp -a "$arquivo" "$pathBase/tests/";
+                            then
+                                printf "\033[31mNão foi possível copiar o arquivo $arquivo\033[m\n"
+                                echo "Abortando operação."
+                                return 1
                         fi
                     ;;
                     *.c)
-                        if ! cp -a "$arquivo" "$pathCompleto/src/";
-                        then
-                            printf "\033[31mNão foi possível copiar o arquivo $arquivo\033[m\n"
-                            return 1
+                        if ! cp -a "$arquivo" "$pathBase/src/";
+                            then
+                                printf "\033[31mNão foi possível copiar o arquivo $arquivo\033[m\n"
+                                return 1
                         fi
                     ;;
                     *.h)
-                        if ! cp -a "$arquivo" "$pathCompleto/include/";
-                        then
-                            printf "\033[31mNão foi possível copiar o arquivo $arquivo\033[m\n"
-                            return 1
+                        if ! cp -a "$arquivo" "$pathBase/include/";
+                            then
+                                printf "\033[31mNão foi possível copiar o arquivo $arquivo\033[m\n"
+                                return 1
                         fi
                     ;;
                 esac
             done
-            
-            if ! touch "$pathCompleto/docs/README.md";
-            then printf "\033[31mNão foi possível criar o README.md em docs\033[m\n"
+                
+            if ! touch "$pathBase/docs/README.md";
+                then printf "\033[31mNão foi possível criar o README.md em docs\033[m\n"
             fi
-        ;;
-    esac
+    fi
+
     printf "\033[32m    -Assets alocados corretamente\033[m\n"
     printf "\033[32;1mProjeto criado com sucesso\033[m\n"
     return 0
-}
-
-verificarTipoDeProjeto() {
-    case "$2" in
-        -t|-c)
-            echo "Criando projeto ${3:-template} ${4:+ no diretório $4}..."
-            criarProjeto "$@"
-        ;;
-        *)
-            printf "Argumento desconhecido.\nUse \033[33m teste help create\033[m para ver os comandos disponíveis\n"
-            return 1
-        ;;
-    esac
 }
 
 #-------------------------------------------------------------------------------
@@ -127,8 +108,8 @@ verificarTipoDeProjeto() {
 limparProjeto() {
     echo "Removendo projeto ${3:-template}${4:+ no diretório $4}..."
 
-    local pathCompleto="${4:-.}/${3:-template}"
-    rm -rf "$pathCompleto" && \
+    local pathBase="${3:-./template}"
+    rm -rf "$pathBase" && \
         printf "\033[32;1mProjeto removido com sucesso\033[m\n" || \
         printf "\033[31;1mErro ao remover o projeto\033[m\n"
 }
@@ -136,13 +117,13 @@ limparProjeto() {
 #-------------------------------------------------------------------------------
 
 case "$1" in
-    "create")
-        verificarTipoDeProjeto "$@"
+    "-create")
+        criarProjeto "$@"
     ;;
-    "clean")
+    "-clean")
         limparProjeto "$@"
     ;;
-    "help")
+    "-help")
         imprimirComandos "$@"
     ;;
     *)

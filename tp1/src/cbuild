@@ -1,18 +1,12 @@
 #!/usr/bin/env bash
 
-RELATIVE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ARGS=${@:2}
+CBUILD_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$CBUILD_ROOT/.env" #Carrega variáveis utilizadas pelos arquivos do projeto
 
 case "$1" in
-    build)
-        echo "comando build"
-    ;;
-    clean)
-        echo "comando clean"
-    ;;
-    test)
-        bash "${RELATIVE_DIR}/tests/test.sh" $ARGS
-    ;;
+    build) echo "comando build" ;;
+    clean) echo "comando clean" ;;
+    test) source "${CBUILD_ROOT}/tests/test.sh" $ARGS ;;
     *)
         echo "Uso: cbuild {build|clean}"
         exit 1
