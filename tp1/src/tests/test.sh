@@ -6,20 +6,16 @@ COMANDOS="create help clean"
 
 imprimirComandos() {
     if [[ -z "$2" ]]; then
-        cat <<EOF
-Comandos disponíveis:
-    -create <diretório> : Cria um template de projeto com o nome fornecido.
-    -clean  <diretório> : Remove o template de projeto do diretório especificado.
-    -help   <comando>   : Exibe informações detalhadas sobre o comando fornecido.
-EOF
+    printf "\033[1mComandos disponíveis:\033[m\n\
+    -create <diretório> : Cria um template de projeto com o nome fornecido.\n\
+    -clean  <diretório> : Remove o template de projeto do diretório especificado.\n\
+    -help   <comando>   : Exibe informações detalhadas sobre o comando fornecido.\n"
     else
         if [[ "$COMANDOS" == *"$2"* ]]; then
             case "$2" in
                 "create")
-                    cat <<EOF
-Comando: create
-    -create <nome_projeto> <diretório>  : Cria um projeto com o nome fornecido, no diretório especificado.
-EOF
+                    printf "Comando: create\n\
+    -create <nome_projeto> <diretório>  : Cria um projeto com o nome fornecido, no diretório especificado.\n"
                 ;;
                 *)
                 echo "O comando '$2' não possui ajuda detalhada."
@@ -127,6 +123,6 @@ case "$1" in
         imprimirComandos "$@"
     ;;
     *)
-        printf "Argumento desconhecido.\nUse\033[33m make test help\033[m para ver os comandos disponíveis\n"
+        printf "Argumento desconhecido.\nUse \033[33mcbuild test -help\033[m para ver os comandos disponíveis\n"
     ;;
 esac

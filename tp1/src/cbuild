@@ -4,11 +4,20 @@ CBUILD_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$CBUILD_ROOT/.env" #Carrega variáveis utilizadas pelos arquivos do projeto
 
 case "$1" in
-    build) echo "comando build" ;;
-    clean) echo "comando clean" ;;
+    build) source "${CBUILD_ROOT}/commands/build.sh";;
+    run) source "${CBUILD_ROOT}/commands/run.sh";;
+    clean) source "${CBUILD_ROOT}/commands/clean.sh";;
+    rebuild) source "${CBUILD_ROOT}/commands/rebuild.sh";;
+    info) source "${CBUILD_ROOT}/commands/info.sh";;
     test) source "${CBUILD_ROOT}/tests/test.sh" $ARGS ;;
     *)
-        echo "Uso: cbuild {build|clean}"
+        printf "\033[37;1mOlá, essa é a CLI para a TP1 do Grupo 15\033[m\n\
+Comandos disponíveis:\n\
+    build   <diretório>: Compila o projeto e gera o executável.\n \
+    run     <diretório>: Executa o programa gerado a partir do projeto.\n\
+    clean   <diretório>: Remove arquivos temporários e objetos intermediários.\n\
+    rebuild <diretório>: Utiliza o \033[40;1m(clean)\033[m e compila o projeto novamente.\n\
+    info    <diretório>:\n"
         exit 1
     ;;
 esac
