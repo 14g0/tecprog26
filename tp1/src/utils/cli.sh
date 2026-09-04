@@ -1,11 +1,24 @@
 #!/usr/bin/env bash
 
-modificarFlagsGlobais() { # $Array(flags)
-    while getopts "vd" opt; do
+#-------------------------------------------------------------------------------
+
+verificarSetX() {
+    if [[ $SETX == true ]]; then
+        echo "entrou"
+        VERBOSE=false
+        DEBUG=false
+        set -x
+    fi
+}
+
+#-------------------------------------------------------------------------------
+
+modificarFlagsCLI() { # $Array(flags)
+    while getopts "$CBUILD_ALLOWED_CLI_FLAGS" opt; do
         case $opt in
-            v)
-                VERBOSE=true;;
+            v) VERBOSE=true;;
             d) DEBUG=true;;
+            x) SETX=true;;
             *) echo "Opção inválida: -$OPTARG" >&2; exit 1;;
         esac
     done
@@ -32,16 +45,16 @@ importarArquivoConfig() {
 #-------------------------------------------------------------------------------
 
 validarCLI() {
-    local flagsGlobais=()
+    local flagsCLI=()
     local quantidadeDiretorios=0
     local configPath
 
     for argumento in "$@"; do
         if [[ "$argumento" =~ ^-[a-zA-Z]+([0-9])?$ ]];
             then
-                if [[ "$argumento" =~ ^-[$CBUILD_ALLOWED_GLOBAL_FLAGS]{1,2}$ ]];
+                if [[ "$argumento" =~ ^-[$CBUILD_ALLOWED_CLI_FLAGS]+$ ]];
                     then
-                        flagsGlobais+=("$argumento")
+                        flagsCLI+=("$argumento")
                     else COMMAND_FLAGS+=("$argumento")
                 fi
             else
@@ -58,7 +71,10 @@ validarCLI() {
         then
             importarArquivoConfig "$configPath"
         else
-            modificarFlagsGlobais "${flagsGlobais[@]}"
+            modificarFlagsCLI "${flagsCLI[@]}"
     fi
-    
+
+    verificarSetX
 }
+
+validarCLI $CLI_ARGS

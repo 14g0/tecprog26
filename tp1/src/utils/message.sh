@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 imprimirMensagem() {
     local mensagem="$1"
     local tipo="$2"
@@ -19,6 +21,12 @@ imprimirMensagem() {
     fi
 
     printf '%b' "\033[${modo};${tipo}m$mensagem\033[m\n"
+}
+
+mensagemComando() { # $mensagem $tipo $modo
+    if [[ $VERBOSE == false && $DEBUG == false && $SETX == false ]]; then
+        imprimirMensagem "$1" "$2" "$3"
+    fi
 }
 
 mensagemVerbose() { # $mensagem $tipo $modo

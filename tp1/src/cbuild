@@ -5,7 +5,6 @@ source "$CBUILD_ROOT/.env" #Carrega variáveis utilizadas pelos arquivos do proj
 source "$CBUILD_ROOT/utils/message.sh" #Carrega funções de mensagens
 source "$CBUILD_ROOT/utils/cli.sh"
 
-validarCLI $CLI_ARGS
 case "$1" in
     build) source "${CBUILD_ROOT}/commands/build.sh" $CLI_ARGS;;
     run) source "${CBUILD_ROOT}/commands/run.sh" $CLI_ARGS;;
