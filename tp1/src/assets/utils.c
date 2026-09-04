@@ -1,4 +1,4 @@
-#include "./progConc.h"
+#include "../include/progConc.h"
 
 void *generateRandNumberArray(int qtt, char* numberType, int fator) {
     int cont;
