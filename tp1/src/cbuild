@@ -2,22 +2,25 @@
 
 CBUILD_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$CBUILD_ROOT/.env" #Carrega variáveis utilizadas pelos arquivos do projeto
+source "$CBUILD_ROOT/utils/message.sh" #Carrega funções de mensagens
+source "$CBUILD_ROOT/utils/cli.sh"
 
+validarCLI $CLI_ARGS
 case "$1" in
-    build) source "${CBUILD_ROOT}/commands/build.sh";;
-    run) source "${CBUILD_ROOT}/commands/run.sh";;
-    clean) source "${CBUILD_ROOT}/commands/clean.sh";;
-    rebuild) source "${CBUILD_ROOT}/commands/rebuild.sh";;
-    info) source "${CBUILD_ROOT}/commands/info.sh";;
-    test) source "${CBUILD_ROOT}/tests/test.sh" $ARGS ;;
+    build) source "${CBUILD_ROOT}/commands/build.sh" $CLI_ARGS;;
+    run) source "${CBUILD_ROOT}/commands/run.sh" $CLI_ARGS;;
+    clean) source "${CBUILD_ROOT}/commands/clean.sh" $CLI_ARGS;;
+    rebuild) source "${CBUILD_ROOT}/commands/rebuild.sh" $CLI_ARGS;;
+    info) source "${CBUILD_ROOT}/commands/info.sh" $CLI_ARGS;;
+    test) source "${CBUILD_ROOT}/tests/test.sh" $CLI_ARGS;;
     *)
         printf "\033[37;1mOlá, essa é a CLI para a TP1 do Grupo 15\033[m\n\
 Comandos disponíveis:\n\
-    build   <diretório>: Compila o projeto e gera o executável.\n \
+    build   <diretório>: Compila o projeto e gera o executável.\n\
     run     <diretório>: Executa o programa gerado a partir do projeto.\n\
     clean   <diretório>: Remove arquivos temporários e objetos intermediários.\n\
     rebuild <diretório>: Utiliza o \033[40;1m(clean)\033[m e compila o projeto novamente.\n\
-    info    <diretório>:\n"
-        exit 1
+    info    <diretório>: Informa sobre estatísticas do projeto.\n"
+        exit 0
     ;;
 esac
