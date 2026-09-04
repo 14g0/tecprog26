@@ -11,3 +11,4 @@ export PATH="$PROJECT_DIR/src:$PATH"
 
 printf "\033[32;1mComando 'cbuild' adicionado ao PATH com sucesso\033[m\n"
 printf "O comando ficará disponível apenas neste terminal.\n"
+return 0
