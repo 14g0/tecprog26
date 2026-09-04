@@ -14,7 +14,7 @@ imprimirMensagem() {
             erro) tipo="31";;
             sucesso) tipo="32";;
             aviso) tipo="33";;
-            informação) tipo="36";;
+            informacao) tipo="36";;
         esac
     fi
 
