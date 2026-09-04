@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     }
     fread(&matriz1.linhas, sizeof(int), 1, arquivo);
     fread(&matriz1.colunas, sizeof(int), 1, arquivo);
-    matriz1.vetor = allocMem(sizeof(float) * matriz1.linhas * matriz1.colunas);
+    matriz1.vetor = allocMem(sizeof(float), matriz1.linhas * matriz1.colunas, "malloc", NULL);
     fread(matriz1.vetor, sizeof(float), matriz1.linhas * matriz1.colunas, arquivo);
 
     if((arquivo = fopen(argv[3], "rb")) == NULL) {
@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     }
     fread(&matriz2.linhas, sizeof(int), 1, arquivo);
     fread(&matriz2.colunas, sizeof(int), 1, arquivo);
-    matriz2.vetor = allocMem(sizeof(float) * matriz2.linhas * matriz2.colunas);
+    matriz2.vetor = allocMem(sizeof(float), matriz2.linhas * matriz2.colunas, "malloc", NULL);
     fread(matriz2.vetor, sizeof(float), matriz2.linhas * matriz2.colunas, arquivo);
 
     if(matriz1.colunas != matriz2.linhas) {
@@ -75,11 +75,11 @@ int main(int argc, char **argv) {
     GET_TIME(inicializacao); /*-----------------------------------------------*/
 
     matrizResultado.linhas = matriz1.linhas;
-    matrizResultado.vetor = allocMem(sizeof(float) * matriz1.linhas * matriz2.colunas);
+    matrizResultado.vetor = allocMem(sizeof(float), matriz1.linhas * matriz2.colunas, "malloc", NULL);
     matrizResultado.colunas = matriz2.colunas;
 
     for(cont = 0 ; cont < T ; cont += 1) {
-        threadArg = allocMem(sizeof(threadArgs));
+        threadArg = allocMem(sizeof(threadArgs), 1, "malloc", NULL);
 
         threadArg->start = N;
         threadArg->threadId = cont;
