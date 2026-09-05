@@ -11,16 +11,14 @@ imprimirMensagem() {
         invertido) modo="7";;
     esac
 
-    if [[ -n "$tipo" ]]; then
-        case $tipo in
-            erro) tipo="31";;
-            sucesso) tipo="32";;
-            aviso) tipo="33";;
-            informacao) tipo="36";;
-        esac
-    fi
+    case $tipo in
+        erro) tipo="31";;
+        sucesso) tipo="32";;
+        aviso) tipo="33";;
+        informacao) tipo="36";;
+    esac
 
-    printf '%b' "\033[${modo};${tipo}m$mensagem\033[m\n"
+    printf '%b' "\033[${modo}${tipo:+;$tipo}m$mensagem\033[m\n"
 }
 
 mensagemComando() { # $mensagem $tipo $modo
