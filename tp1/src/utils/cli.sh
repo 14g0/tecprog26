@@ -4,7 +4,6 @@
 
 verificarSetX() {
     if [[ $SETX == true ]]; then
-        echo "entrou"
         VERBOSE=false
         DEBUG=false
         set -x
@@ -19,7 +18,7 @@ modificarFlagsCLI() { # $Array(flags)
             v) VERBOSE=true;;
             d) DEBUG=true;;
             x) SETX=true;;
-            *) echo "Opção inválida: -$OPTARG" >&2; exit 1;;
+            *) saidaDeErro "Opção inválida: -$OPTARG"
         esac
     done
 }
@@ -49,32 +48,38 @@ validarCLI() {
     local quantidadeDiretorios=0
     local configPath
 
-    for argumento in "$@"; do
-        if [[ "$argumento" =~ ^-[a-zA-Z]+([0-9])?$ ]];
-            then
-                if [[ "$argumento" =~ ^-[$CBUILD_ALLOWED_CLI_FLAGS]+$ ]];
-                    then
-                        flagsCLI+=("$argumento")
-                    else COMMAND_FLAGS+=("$argumento")
-                fi
-            else
-                ((quantidadeDiretorios+=1))
-                if ((quantidadeDiretorios > 1)); then
-                    saidaDeErro "Apenas um diretório de destino é permitido."
-                fi
-                CBUILD_TARGET_DIR="$(realpath $argumento)"
-        fi
-    done
-
-    configPath="$CBUILD_TARGET_DIR/.config"
-    if [[ -f "$configPath" ]];
-        then
-            importarArquivoConfig "$configPath"
+    if [[ (( $# == 0 )) ]]; 
+        then CBUILD_TARGET_DIR="$(realpath .)"
         else
-            modificarFlagsCLI "${flagsCLI[@]}"
-    fi
+            for argumento in "$@"; do
+                if [[ "$argumento" =~ ^-[a-zA-Z]+([0-9])?$ ]];
+                    then
+                        if [[ "$argumento" =~ ^-[$CBUILD_ALLOWED_CLI_FLAGS]+$ ]];
+                            then
+                                flagsCLI+=("$argumento")
+                            else COMMAND_FLAGS+=("$argumento")
+                        fi
+                    else
+                        ((quantidadeDiretorios+=1))
+                        if ((quantidadeDiretorios > 1)); then
+                            saidaDeErro "Apenas um diretório de destino é permitido."
+                        fi
+                        CBUILD_TARGET_DIR="$(realpath $argumento)"
+                fi
+            done
 
-    verificarSetX
+            configPath="$CBUILD_TARGET_DIR/.config"
+            if [[ -f "$configPath" ]];
+                then
+                    importarArquivoConfig "$configPath"
+                else
+                    modificarFlagsCLI "${flagsCLI[@]}"
+            fi
+
+            verificarSetX
+    fi
 }
+
+#-------------------------------------------------------------------------------
 
 validarCLI $CLI_ARGS
