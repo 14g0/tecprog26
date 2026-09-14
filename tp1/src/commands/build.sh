@@ -1,19 +1,4 @@
 #!/usr/bin/env bash
-#!/usr/bin/env bash
-
-#-------------------------------------------------------------------------------
-
-removerDiretorioBuildEmErro() {
-    if [[ $? -ne 0 ]];
-        then
-            mensagemVerbose "Removendo diretório de build em erro: '$CBUILD_TARGET_DIR/build'" aviso
-            mensagemDebug "rm -rf "$CBUILD_TARGET_DIR/build""
-            rm -rf "$CBUILD_TARGET_DIR/build"
-            imprimirMensagem "'$CBUILD_TARGET_DIR/build' removido com sucesso" erro 1
-    fi
-}
-
-trap removerDiretorioBuildEmErro EXIT
 
 #-------------------------------------------------------------------------------
 
