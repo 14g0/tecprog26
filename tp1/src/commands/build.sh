@@ -48,7 +48,7 @@ verificarEstruturaDoProjeto() {
             fi
     fi
 
-    mensagemComando "-Estrutura de diretórios e arquivos fonte do projeto verificada com sucesso" sucesso
+    mensagemComando "-Estrutura de diretórios e arquivos fonte do projeto verificada" informacao
 }
 
 #-------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ validarFlagsCompilacao() {
         fi
     done
 
-    mensagemComando "-Flags de compilação validadas, flags inválidas removidas" sucesso
+    mensagemComando "-Flags de compilação validadas, flags inválidas removidas" informacao
 
     return 0
 }
@@ -174,7 +174,7 @@ gerarArquivosLinkedicao() {
         fi
     done
 
-    mensagemComando "-Arquivos de linkedição gerados com sucesso" sucesso
+    mensagemComando "-Arquivos de linkedição gerados com sucesso" informacao
 
     return 0
 }
