@@ -55,8 +55,7 @@ validarCLI() {
                 if [[ "$argumento" =~ ^-[a-zA-Z]+([0-9])?$ ]];
                     then
                         if [[ "$argumento" =~ ^-[$CBUILD_ALLOWED_CLI_FLAGS]+$ ]];
-                            then
-                                flagsCLI+=("$argumento")
+                            then flagsCLI+=("$argumento")
                             else COMMAND_FLAGS+=("$argumento")
                         fi
                     else
