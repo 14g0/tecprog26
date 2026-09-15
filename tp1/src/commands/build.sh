@@ -48,7 +48,10 @@ validarFlagsCompilacao() {
         flag="${COMMAND_FLAGS[$indiceFlag]}"
 
         mensagemDebug "! printf 'int main(void){return 0;}' | gcc "$flag" -x c - -fsyntax-only >/dev/null 2>&1"
-        # -x c: indica que o arquivo de entrada é C | - : lê o código-fonte do stdin | -fsyntax-only: apenas verifica a sintaxe, não gera código objeto
+
+        # -x c: indica que o arquivo de entrada é C
+        # - : lê o código-fonte do stdin
+        # -fsyntax-only: apenas verifica a sintaxe, não gera arquivo objeto
         if ! printf 'int main(void){return 0;}\n' | gcc "$flag" -x c - -fsyntax-only >/dev/null 2>&1;
             then
                 mensagemVerbose "Removendo flag de compilação inválida: '$flag'" aviso sublinhado
@@ -72,6 +75,7 @@ checarMtimeDependencias() {
     grep -E '^[^[:space:]].*\.o:|^[[:space:]]+[^[:space:]]' "$arquivoDependencia" |\n \
     grep -oE '[^[:space:]]+\.(c|h)'\n \
 )"
+    #[:space:] substitui \s no regex porque o primeiro é mais amplamente aceito no POSIX
     mapfile -t arrayArquivosDependencia < <(
         grep -E '^[^[:space:]].*\.o:|^[[:space:]]+[^[:space:]]' "$arquivoDependencia" |
         grep -oE '[^[:space:]]+\.(c|h)'
@@ -150,6 +154,11 @@ gerarArquivosLinkedicao() {
                 mensagemVerbose "Gerando arquivos de linkedição para '$arquivoFonte'"
                 mensagemDebug "gcc -c -Iinclude -MMD -MP -MF "$arquivoDependencia" "$arquivoFonte" -o "$arquivoObjeto" ${COMMAND_FLAGS[*]}"
 
+                # -c: compila o código-fonte para um arquivo objeto (.o), sem fazer a linkedição.
+                # -Iinclude: adiciona /include à lista de diretórios onde o GCC procura arquivos .h.
+                # -MMD: gera automaticamente dependências do arquivo, ignorando headers do sistema.
+                # -MP: cria alvos fictícios para headers, evitando erros se um header for removido.
+                # -MF arquivo: define onde o arquivo de dependências (.d) será salvo.
                 if gcc -c -Iinclude -MMD -MP -MF "$arquivoDependencia" "$arquivoFonte" -o "$arquivoObjeto" ${COMMAND_FLAGS[*]};
                     then
                         mensagemVerbose "Arquivos de linkedição gerados com sucesso para '$arquivoFonte'" sucesso 1
