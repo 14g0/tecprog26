@@ -5,14 +5,14 @@
 # FORMATO DE REGISTRO DO LOG:
 #   data de execução | tempo de execução | comando | codigoErro | flags
 #   0 para sucesso, mensagem de erro em falha
-#   ============================================================================
+#   ===
 
 #-------------------------------------------------------------------------------
 
 logComando() {
     local flags=()
     local argumento
-    local dataAtual=$(date +"%m/%d/%Y_%H:%M:%S")
+    local dataAtual=$(date +"%m/%d/%Y %H:%M:%S")
     local tempoExecucao
 
     tempoExecucao=$(awk -v inicio="$CBUILD_START_TIME" -v fim="$CBUILD_END_TIME" \
@@ -45,15 +45,15 @@ logComando() {
             fi
     fi
 
-    mensagemVerbose "Contabilizar flags de comando"
-    for argumento in "$@"; do
+    mensagemVerbose "Contabilizando flags de comando"
+    for argumento in "${CBUILD_COMMAND_ALL_FLAGS[@]}"; do
         if [[ "$argumento" =~ ^-[a-zA-Z]+([0-9])?$ ]];
             then flags+=("$argumento")
         fi
     done
 
     mensagemVerbose "Registrando log do comando em '$CBUILD_TARGET_DIR/logs/cbuild.log'"
-    mensagemDebug "printf '%s|%s|%s|%s|%s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$comando" "$tempo" "$CBUILD_LOG_CODE" "$flags""
+    mensagemDebug "printf '%s|%s|%s|%s|%s\n' "$dataAtual" "$comando" "$tempo" "$CBUILD_LOG_CODE" "$flags""
     {
         printf '%s|%s|%s|%s|%s\n' "$dataAtual" "$tempoExecucao" "$CBUILD_LOG_COMMAND" "$CBUILD_LOG_CODE" "${flags[*]}"
         if [ -n "$CBUILD_LOG_MESSAGE" ]; then
@@ -61,12 +61,28 @@ logComando() {
         fi
         printf '===\n'
     } >> "$CBUILD_TARGET_DIR/logs/cbuild.log"
+    mensagemVerbose "Log do comando registrado com sucesso em '$CBUILD_TARGET_DIR/logs/cbuild.log'" sucesso
 }
 
+#-------------------------------------------------------------------------------
+
+verificarEstruturaDiretorios() {
+    if [[
+        ! -d "$CBUILD_TARGET_DIR/src" &&
+        ! -d "$CBUILD_TARGET_DIR/include"
+    ]];
+            then exit 400
+    fi
+}
+
+#-------------------------------------------------------------------------------
+
 registrarLog() {
+    verificarEstruturaDiretorios
+
     local status="$?"
 
-    [[ "$CBUILD_END_TIME" == 0 ]] && CBUILD_END_TIME=$EPOCHREALTIME
+    [[ "$CBUILD_END_TIME" == 0 ]] && CBUILD_END_TIME="${EPOCHREALTIME/,/.}"
 
     if [[ "$status" -ne 0 && "$CBUILD_LOG_CODE" == 0 ]];
         then CBUILD_LOG_CODE="$status"

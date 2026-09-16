@@ -94,5 +94,110 @@ contabilizarEstatisticasProjeto() {
 
 #-------------------------------------------------------------------------------
 
+validarFlagsInformacao() {
+    local argumento
+
+    mensagemVerbose "Validando flags de comando para filtragem de informações"
+
+    for argumento in "${COMMAND_FLAGS[@]}"; do
+        mensagemDebug "[[ ! "$argumento" =~ ^-run|build|clean|rebuild|[0-9]{1,3}$ ]]"
+
+        if [[ ! "$argumento" =~ ^-(run|build|clean|rebuild|[0-9]{1,3})$ ]]
+            then
+                mensagemVerbose "Flag de comando inválida removida: '$argumento'" aviso sublinhado
+                mensagemDebug "unset 'COMMAND_FLAGS[$argumento]'"
+                unset "COMMAND_FLAGS[$argumento]"
+        fi
+    done
+}
+
+#-------------------------------------------------------------------------------
+
+mostrarLog() {
+    local flagComando
+    local flagCodigo
+    local argumento
+
+    imprimirMensagem "\nHISTÓRICO DE COMANDOS" "" 1
+
+    if [[ ! -s "$CBUILD_TARGET_DIR/logs/cbuild.log" ]]; then
+        imprimirMensagem "Nenhum log encontrado" aviso
+        return 0
+    fi
+
+    for argumento in "${COMMAND_FLAGS[@]}"; do
+        if [[ "$argumento" =~ ^-(run|build|clean|rebuild)$ ]];
+            then
+                [[ -n "$flagComando" ]] &&
+                    imprimirMensagem "Substituindo flag de comando '$flagComando'->'$argumento'" aviso sublinhado
+                flagComando="${argumento#-}"
+
+        elif [[ "$argumento" =~ ^-[0-9]{1,3}$ ]];
+            then
+                [[ -n "$flagCodigo" ]] &&
+                    imprimirMensagem "Substituindo flag de código '$flagCodigo'->'$argumento'" aviso sublinhado
+                flagCodigo="${argumento#-}"
+        fi
+    done
+
+    local registros=()
+    local registroAtual=""
+    local linha
+    local indice
+    local linhasRegistro=()
+    local cabecalho
+    local data
+    local tempo
+    local comando
+    local codigo
+    local flags
+    local cor
+
+    while IFS= read -r linha || [[ -n "$linha" ]]; do
+        registroAtual+="$linha"$'\n'
+
+        if [[ "$linha" == '===' ]];
+            then
+                registros+=("$registroAtual")
+                registroAtual=""
+        fi
+    done < "$CBUILD_TARGET_DIR/logs/cbuild.log"
+
+    [[ -n "$registroAtual" ]] && registros+=("$registroAtual")
+
+    for (( indice=${#registros[@]} - 1 ; indice >= 0 ; indice-- )); do
+        mapfile -t linhasRegistro <<< "${registros[$indice]}"
+        cabecalho="${linhasRegistro[0]}"
+        IFS='|' read -r data tempo comando codigo flags <<< "$cabecalho"
+
+        [[ -n "$flagComando" && "$comando" != "$flagComando" ]] && continue
+        [[ -n "$flagCodigo" && "$codigo" != "$flagCodigo" ]] && continue
+
+        if [[ "$codigo" == 0 ]];
+            then cor=32
+            else cor=31
+        fi
+
+        printf '\033[%sm%-19s  %-8s  %8ss  código %-3s\033[m' \
+            "$cor" "$data" "$comando" "$tempo" "$codigo"
+
+        [[ -n "$flags" ]] && printf '  flags: %s' "$flags"
+        printf '\n'
+
+        for (( linha=1; linha<${#linhasRegistro[@]}; linha++ )); do
+            [[ -n "${linhasRegistro[$linha]}" && "${linhasRegistro[$linha]}" != '===' ]] &&
+                printf '  mensagem: %b\n' "${linhasRegistro[$linha]}"
+        done
+        printf '\033[90m------------------------------------------------------------\033[m\n'
+    done
+}
+
+#-------------------------------------------------------------------------------
+
+
 verificarEstruturaDoProjeto
-contabilizarEstatisticasProjeto
+validarFlagsInformacao
+{
+    contabilizarEstatisticasProjeto
+    mostrarLog
+} | less -R # -R permite cor ansi no less

@@ -52,8 +52,9 @@ validarCLI() {
         then CBUILD_TARGET_DIR="$(realpath .)"
         else
             for argumento in "$@"; do
-                if [[ "$argumento" =~ ^-[a-zA-Z]+([0-9])?$ ]];
+                if [[ "$argumento" =~ ^-([a-zA-Z]+([0-9])?|[0-9]{1,3})$ ]];
                     then
+                        CBUILD_COMMAND_ALL_FLAGS+=("$argumento")
                         if [[ "$argumento" =~ ^-[$CBUILD_ALLOWED_CLI_FLAGS]+$ ]];
                             then flagsCLI+=("$argumento")
                             else COMMAND_FLAGS+=("$argumento")

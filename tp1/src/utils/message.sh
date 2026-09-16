@@ -23,7 +23,7 @@ imprimirMensagem() {
 
 mensagemComando() { # $mensagem $tipo $modo
     if [[ $VERBOSE == false && $DEBUG == false && $SETX == false ]]; then
-        imprimirMensagem "$1" "$2" "$3"
+        imprimirMensagem "$1" "${2:-informacao}" "$3"
     fi
 }
 
@@ -42,7 +42,7 @@ mensagemDebug() { # $mensagem $tipo $modo
 }
 
 saidaDeErro() { # $codigoErro $mensagem
-    CBUILD_END_TIME=$EPOCHREALTIME
+    CBUILD_END_TIME="${EPOCHREALTIME/,/.}"
     CBUILD_LOG_CODE="$1"
     CBUILD_LOG_MESSAGE="$2"
 

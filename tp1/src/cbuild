@@ -4,12 +4,12 @@ CBUILD_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$CBUILD_ROOT/.env"
 source "$CBUILD_ROOT/utils/message.sh"
 source "$CBUILD_ROOT/utils/cli.sh"
-source "$CBUILD_ROOT/utils/log.sh"
+source "$CBUILD_ROOT/utils/log.sh" $@
 
 case "$1" in
     build|run|clean|rebuild)
         CBUILD_LOG_COMMAND="$1"
-        CBUILD_START_TIME=$EPOCHREALTIME
+        CBUILD_START_TIME="${EPOCHREALTIME/,/.}"
         trap registrarLog EXIT
     ;;
 esac
