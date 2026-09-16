@@ -118,7 +118,8 @@ mostrarLog() {
     local flagCodigo
     local argumento
 
-    imprimirMensagem "\nHISTÓRICO DE COMANDOS" "" 1
+    # TODO: por algum motivo \n no início desfaz a estilização | imprimirMensagem "\nHISTÓRICO DE COMANDOS" informacao negrito
+    printf "\n\033[1mHISTÓRIO DE COMANDOS\033[m\n"
 
     if [[ ! -s "$CBUILD_TARGET_DIR/logs/cbuild.log" ]]; then
         imprimirMensagem "Nenhum log encontrado" aviso
