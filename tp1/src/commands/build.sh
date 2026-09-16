@@ -176,19 +176,33 @@ gerarArquivosLinkedicao() {
 #-------------------------------------------------------------------------------
 
 linkeditarArquivos() {
-    local arrayArquivosObjeto=()
+    local arquivoFonte
+    local arrayArquivosFonte=()
     local arquivoObjeto
+    local arrayArquivosObjeto=()
 
-    mensagemVerbose "Separando arquivos objeto para linkedição"
-    mapfile -t arrayArquivosObjeto < <(
-        find "$CBUILD_TARGET_DIR/build/bin" -name '*.o'
+    mensagemVerbose "Separando arquivos objeto correspondentes aos fontes atuais"
+    mapfile -t arrayArquivosFonte < <(
+        find "$CBUILD_TARGET_DIR/src" -type f -name '*.c'
     )
 
-    mensagemVerbose "Linkeditando arquivos objeto em '$CBUILD_TARGET_DIR/build/bin'"
-    mensagemDebug "gcc -o $CBUILD_TARGET_DIR/build/$(dirname "$CBUILD_TARGET_DIR") ${arrayArquivosObjeto[*]} ${COMMAND_FLAGS[*]}"
+    for arquivoFonte in "${arrayArquivosFonte[@]}"; do
+        arquivoObjeto="$CBUILD_TARGET_DIR/build/bin/$(basename "${arquivoFonte%.c}.o")"
+        if [[ -f "$arquivoObjeto" ]]; then
+            arrayArquivosObjeto+=("$arquivoObjeto")
+        fi
+    done
 
-    if ! gcc -o "$CBUILD_TARGET_DIR/build/$(basename "$CBUILD_TARGET_DIR").exe" "${arrayArquivosObjeto[@]}" "${COMMAND_FLAGS[@]}";
+    if (( ${#arrayArquivosObjeto[@]} == 0 )); then
+        saidaDeErro 110 "Nenhum arquivo objeto encontrado para os fontes atuais"
+    fi
+
+    mensagemVerbose "Linkeditando arquivos objeto em '$CBUILD_TARGET_DIR/build/bin'"
+    mensagemDebug "gcc -o $CBUILD_TARGET_DIR/build/$(dirname "$CBUILD_TARGET_DIR") ${arrayArquivosObjeto[*]}"
+
+    if ! gcc -o "$CBUILD_TARGET_DIR/build/$(basename "$CBUILD_TARGET_DIR").exe" "${arrayArquivosObjeto[@]}";
         then
+            rm -f "$CBUILD_TARGET_DIR/build/$(basename "$CBUILD_TARGET_DIR").exe"
             saidaDeErro 109 "Falha ao linkeditar arquivos objeto em '$CBUILD_TARGET_DIR/build/bin'"
     fi
 
@@ -198,7 +212,7 @@ linkeditarArquivos() {
 #-------------------------------------------------------------------------------
 
 verificarEstruturaDoProjeto
-gerarArquivosLinkedicao
 validarFlagsCompilacao
+gerarArquivosLinkedicao
 linkeditarArquivos
 return 0
