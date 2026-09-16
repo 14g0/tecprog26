@@ -6,18 +6,18 @@ verificarEstruturaDoProjeto() {
     mensagemVerbose "Verificando Estrutura de Diretórios e Arquivos Fonte do Projeto"
 
     if [[ ! -d $CBUILD_TARGET_DIR ]];
-        then saidaDeErro "O diretório '$CBUILD_TARGET_DIR' não existe."
+        then saidaDeErro 101 "O diretório '$CBUILD_TARGET_DIR' não existe."
         else
             mensagemVerbose "Verificando se '$CBUILD_TARGET_DIR' contém a estrutura de diretórios esperada"
             mensagemDebug "[[ ! -d "$CBUILD_TARGET_DIR/src" ]]"
             [[ ! -d $CBUILD_TARGET_DIR/src ]] &&
-                saidaDeErro "O diretório '$CBUILD_TARGET_DIR' não contém a estrutura de diretórios esperada.\n> $CBUILD_TARGET_DIR/src ausente."
+                saidaDeErro 102 "O diretório '$CBUILD_TARGET_DIR' não contém a estrutura de diretórios esperada.\n> $CBUILD_TARGET_DIR/src ausente."
             
             mensagemVerbose "Verificando se '$CBUILD_TARGET_DIR/src' contém arquivos de código-fonte"
             mensagemDebug "find "$CBUILD_TARGET_DIR/src/" -type f -name "*.h""
             if [[ -n $(find "$CBUILD_TARGET_DIR/src/" -type f -name "*.c") ]];
                 then mensagemVerbose "Arquivos de código-fonte encontrados em '$CBUILD_TARGET_DIR/src'"
-                else saidaDeErro "O diretório '$CBUILD_TARGET_DIR/src' não contém arquivos de código-fonte."
+                else saidaDeErro 103 "O diretório '$CBUILD_TARGET_DIR/src' não contém arquivos de código-fonte."
             fi
 
             mensagemVerbose "Verificando existência de '$CBUILD_TARGET_DIR/include'"
@@ -108,7 +108,7 @@ gerarArquivosLinkedicao() {
             mensagemDebug "mkdir -p "$CBUILD_TARGET_DIR/build""
             if mkdir -p "$CBUILD_TARGET_DIR/build";
                 then mensagemVerbose "Diretório de build criado com sucesso em '$CBUILD_TARGET_DIR/build'" sucesso
-                else saidaDeErro "Falha ao criar diretório de build em '$CBUILD_TARGET_DIR/build'"
+                else saidaDeErro 104 "Falha ao criar diretório de build em '$CBUILD_TARGET_DIR/build'"
             fi
     fi
 
@@ -119,7 +119,7 @@ gerarArquivosLinkedicao() {
             mensagemDebug "mkdir -p "$CBUILD_TARGET_DIR/build/bin""
             if mkdir -p "$CBUILD_TARGET_DIR/build/bin";
                 then mensagemVerbose "Diretório de objetos criado com sucesso em '$CBUILD_TARGET_DIR/build/bin'" sucesso
-                else saidaDeErro "Falha ao criar diretório de objetos em '$CBUILD_TARGET_DIR/build/bin'"
+                else saidaDeErro 105 "Falha ao criar diretório de objetos em '$CBUILD_TARGET_DIR/build/bin'"
             fi
     fi
 
@@ -130,7 +130,7 @@ gerarArquivosLinkedicao() {
             mensagemDebug "mkdir -p "$CBUILD_TARGET_DIR/build/dependencies""
             if mkdir -p "$CBUILD_TARGET_DIR/build/dependencies";
                 then mensagemVerbose "Diretório de dependências criado com sucesso em '$CBUILD_TARGET_DIR/build/dependencies'" sucesso
-                else saidaDeErro "Falha ao criar diretório de dependências em '$CBUILD_TARGET_DIR/build/dependencies'"
+                else saidaDeErro 106 "Falha ao criar diretório de dependências em '$CBUILD_TARGET_DIR/build/dependencies'"
             fi
     fi
 
@@ -142,7 +142,7 @@ gerarArquivosLinkedicao() {
         find "$CBUILD_TARGET_DIR/src" -name '*.c'
     )
     (( ${#arrayArquivosFonte[@]} < 1 )) && \
-        saidaDeErro "Nenhum arquivo fonte encontrado em '$CBUILD_TARGET_DIR/src'"
+        saidaDeErro 107 "Nenhum arquivo fonte encontrado em '$CBUILD_TARGET_DIR/src'"
 
     for arquivoFonte in "${arrayArquivosFonte[@]}"; do
         arquivoObjeto="$CBUILD_TARGET_DIR/build/bin/$(basename "${arquivoFonte%.c}.o")"
@@ -163,7 +163,7 @@ gerarArquivosLinkedicao() {
                     then
                         mensagemVerbose "Arquivos de linkedição gerados com sucesso para '$arquivoFonte'" sucesso 1
                     else
-                        saidaDeErro "Falha ao gerar arquivos de linkedição para '$arquivoFonte'"
+                        saidaDeErro 108 "Falha ao gerar arquivos de linkedição para '$arquivoFonte'"
                 fi
         fi
     done
@@ -189,7 +189,7 @@ linkeditarArquivos() {
 
     if ! gcc -o "$CBUILD_TARGET_DIR/build/$(basename "$CBUILD_TARGET_DIR").exe" "${arrayArquivosObjeto[@]}" "${COMMAND_FLAGS[@]}";
         then
-            saidaDeErro "Falha ao linkeditar arquivos objeto em '$CBUILD_TARGET_DIR/build/bin'"
+            saidaDeErro 109 "Falha ao linkeditar arquivos objeto em '$CBUILD_TARGET_DIR/build/bin'"
     fi
 
     mensagemComando "Compilação concluída com sucesso" sucesso 1

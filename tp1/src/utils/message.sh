@@ -41,7 +41,11 @@ mensagemDebug() { # $mensagem $tipo $modo
     fi
 }
 
-saidaDeErro() { # $mensagem
-    imprimirMensagem "ERRO: $1" "erro" "4" >&2 # Força a mensagem para o terminal através da stderr
-    exit 1
+saidaDeErro() { # $codigoErro $mensagem
+    CBUILD_END_TIME=$EPOCHREALTIME
+    CBUILD_LOG_CODE="$1"
+    CBUILD_LOG_MESSAGE="$2"
+
+    imprimirMensagem "ERRO: $2" erro 4 >&2 # Força a mensagem para o terminal através da stderr
+    exit "$1"
 }

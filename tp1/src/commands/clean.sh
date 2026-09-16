@@ -6,7 +6,7 @@ limparProjeto() {
     mensagemDebug "rm -rf "$CBUILD_TARGET_DIR/build""
 
     if ! rm -rf "$CBUILD_TARGET_DIR/build"; then
-        saidaDeErro "Falha ao remover diretório de build"
+        saidaDeErro 501 "Falha ao remover diretório de build"
     fi
 
     mensagemVerbose "Projeto limpo com sucesso" sucesso

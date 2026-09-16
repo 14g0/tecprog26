@@ -18,7 +18,7 @@ modificarFlagsCLI() { # $Array(flags)
             v) VERBOSE=true;;
             d) DEBUG=true;;
             x) SETX=true;;
-            *) saidaDeErro "Opção inválida: -$OPTARG"
+            *) saidaDeErro 301 "Opção inválida: -$OPTARG"
         esac
     done
 }
@@ -61,7 +61,7 @@ validarCLI() {
                     else
                         ((quantidadeDiretorios+=1))
                         if ((quantidadeDiretorios > 1)); then
-                            saidaDeErro "Apenas um diretório de destino é permitido."
+                            saidaDeErro 302 "Apenas um diretório de destino é permitido."
                         fi
                         CBUILD_TARGET_DIR="$(realpath $argumento)"
                 fi

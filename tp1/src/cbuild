@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
 
 CBUILD_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$CBUILD_ROOT/.env" #Carrega variáveis utilizadas pelos arquivos do projeto
-source "$CBUILD_ROOT/utils/message.sh" #Carrega funções de mensagens
+source "$CBUILD_ROOT/.env"
+source "$CBUILD_ROOT/utils/message.sh"
 source "$CBUILD_ROOT/utils/cli.sh"
+source "$CBUILD_ROOT/utils/log.sh"
+
+case "$1" in
+    build|run|clean|rebuild)
+        CBUILD_LOG_COMMAND="$1"
+        CBUILD_START_TIME=$EPOCHREALTIME
+        trap registrarLog EXIT
+    ;;
+esac
 
 case "$1" in
     build) source "${CBUILD_ROOT}/commands/build.sh" $CLI_ARGS;;

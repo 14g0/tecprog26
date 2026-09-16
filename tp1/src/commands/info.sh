@@ -6,18 +6,18 @@ verificarEstruturaDoProjeto() {
     mensagemVerbose "Verificando Estrutura de Diretórios e Arquivos Fonte do Projeto"
     mensagemDebug "[[ ! -d "$CBUILD_TARGET_DIR" ]]"
     if [[ ! -d $CBUILD_TARGET_DIR ]];
-        then saidaDeErro "O diretório '$CBUILD_TARGET_DIR' não existe."
+        then saidaDeErro 201 "O diretório '$CBUILD_TARGET_DIR' não existe."
         else
             mensagemVerbose "Verificando se '$CBUILD_TARGET_DIR' contém a estrutura de diretórios esperada"
             mensagemDebug "[[ ! -d "$CBUILD_TARGET_DIR/src" ]]"
             [[ ! -d $CBUILD_TARGET_DIR/src ]] &&
-                saidaDeErro "O diretório '$CBUILD_TARGET_DIR' não contém a estrutura de diretórios esperada.\n> $CBUILD_TARGET_DIR/src ausente."
+                saidaDeErro 202 "O diretório '$CBUILD_TARGET_DIR' não contém a estrutura de diretórios esperada.\n> $CBUILD_TARGET_DIR/src ausente."
             
             mensagemVerbose "Verificando se '$CBUILD_TARGET_DIR/src' contém arquivos de código-fonte"
             mensagemDebug "find "$CBUILD_TARGET_DIR/src/" -type f -name "*.h""
             if [[ -n $(find "$CBUILD_TARGET_DIR/src/" -type f -name "*.c") ]];
                 then mensagemVerbose "Arquivos de código-fonte encontrados em '$CBUILD_TARGET_DIR/src'"
-                else saidaDeErro "O diretório '$CBUILD_TARGET_DIR/src' não contém arquivos de código-fonte."
+                else saidaDeErro 203 "O diretório '$CBUILD_TARGET_DIR/src' não contém arquivos de código-fonte."
             fi
 
             mensagemVerbose "Verificando existência de '$CBUILD_TARGET_DIR/include'"
@@ -46,7 +46,7 @@ contabilizarEstatisticasProjeto() {
     mensagemDebug "mapfile -t arquivosProjeto < <(find "$CBUILD_TARGET_DIR/src" -type f -name '*.c' -o -name '*.h')"
     ! mapfile -t arquivosProjeto < <(
         find "$CBUILD_TARGET_DIR" -type f -name "*.c" -o -name "*.h" -o -name "*.md"
-    ) && saidaDeErro "Falha ao buscar arquivos do projeto para contabilização"
+    ) && saidaDeErro 204 "Falha ao buscar arquivos do projeto para contabilização"
 
     mensagemVerbose "Quantidade de arquivos do projeto contabilizada"
     totalArquivos=${#arquivosProjeto[@]}
@@ -57,7 +57,7 @@ contabilizarEstatisticasProjeto() {
             mensagemDebug "read -r totalLinhas _ < <(wc -l "\${arquivosProjeto[@]}")"
 
             if ! read -r totalLinhas _ < <(wc -l "${arquivosProjeto[@]}" | tail -n 1);
-                then saidaDeErro "Falha ao contabilizar linhas de código do projeto"
+                then saidaDeErro 205 "Falha ao contabilizar linhas de código do projeto"
             fi
 
         else totalLinhas=-1
@@ -68,7 +68,7 @@ contabilizarEstatisticasProjeto() {
         then
             mensagemDebug "stat -c %s "$CBUILD_TARGET_DIR/build/$(basename $CBUILD_TARGET_DIR).exe""
             if ! tamanhoExecutavel=$(stat -c %s "$CBUILD_TARGET_DIR/build/$(basename $CBUILD_TARGET_DIR).exe");
-                then saidaDeErro "Falha ao buscar tamanho do executável do projeto para contabilização"
+                then saidaDeErro 206 "Falha ao buscar tamanho do executável do projeto para contabilização"
             fi
 
         else
