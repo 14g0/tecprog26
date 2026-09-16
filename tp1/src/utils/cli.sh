@@ -48,36 +48,34 @@ validarCLI() {
     local quantidadeDiretorios=0
     local configPath
 
-    if [[ (( $# == 0 )) ]]; 
-        then CBUILD_TARGET_DIR="$(realpath .)"
-        else
-            for argumento in "$@"; do
-                if [[ "$argumento" =~ ^-([a-zA-Z]+([0-9])?|[0-9]{1,3})$ ]];
-                    then
-                        CBUILD_COMMAND_ALL_FLAGS+=("$argumento")
-                        if [[ "$argumento" =~ ^-[$CBUILD_ALLOWED_CLI_FLAGS]+$ ]];
-                            then flagsCLI+=("$argumento")
-                            else COMMAND_FLAGS+=("$argumento")
-                        fi
-                    else
-                        ((quantidadeDiretorios+=1))
-                        if ((quantidadeDiretorios > 1)); then
-                            saidaDeErro 302 "Apenas um diretório de destino é permitido."
-                        fi
-                        CBUILD_TARGET_DIR="$(realpath $argumento)"
+    for argumento in "$@"; do
+        if [[ "$argumento" =~ ^-([a-zA-Z]+([0-9])?|[0-9]{1,3})$ ]];
+            then
+                CBUILD_COMMAND_ALL_FLAGS+=("$argumento")
+                if [[ "$argumento" =~ ^-[$CBUILD_ALLOWED_CLI_FLAGS]+$ ]];
+                    then flagsCLI+=("$argumento")
+                    else COMMAND_FLAGS+=("$argumento")
                 fi
-            done
+            else
+                ((quantidadeDiretorios+=1))
+                if ((quantidadeDiretorios > 1)); then
+                    saidaDeErro 302 "Apenas um diretório de destino é permitido."
+                fi
+                CBUILD_TARGET_DIR="$(realpath ${argumento:-.})"
+        fi
+    done
 
-            configPath="$CBUILD_TARGET_DIR/.config"
-            if [[ -f "$configPath" ]];
-                then
-                    importarArquivoConfig "$configPath"
-                else
-                    modificarFlagsCLI "${flagsCLI[@]}"
-            fi
+    [[ -z "$CBUILD_TARGET_DIR" ]] && CBUILD_TARGET_DIR="$(realpath .)"
 
-            verificarSetX
+    configPath="$CBUILD_TARGET_DIR/.config"
+    if [[ -f "$configPath" ]];
+        then
+            importarArquivoConfig "$configPath"
+        else
+            modificarFlagsCLI "${flagsCLI[@]}"
     fi
+
+    verificarSetX
 }
 
 #-------------------------------------------------------------------------------
