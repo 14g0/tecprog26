@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
     }
     fread(&matriz1.linhas, sizeof(int), 1, arquivo);
     fread(&matriz1.colunas, sizeof(int), 1, arquivo);
-    matriz1.vetor = mallocMem(sizeof(float) * matriz1.linhas * matriz1.colunas);
+    matriz1.vetor = allocMem(sizeof(float), matriz1.linhas * matriz1.colunas, "malloc", NULL);
     fread(matriz1.vetor, sizeof(float), matriz1.linhas * matriz1.colunas, arquivo);
 
     if((arquivo = fopen(argv[2], "rb")) == NULL) {
@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
     }
     fread(&matriz2.linhas, sizeof(int), 1, arquivo);
     fread(&matriz2.colunas, sizeof(int), 1, arquivo);
-    matriz2.vetor = mallocMem(sizeof(float) * matriz2.linhas * matriz2.colunas);
+    matriz2.vetor = allocMem(sizeof(float), matriz2.linhas * matriz2.colunas, "malloc", NULL);
     fread(matriz2.vetor, sizeof(float), matriz2.linhas * matriz2.colunas, arquivo);
 
     GET_TIME(inicializacao);
@@ -97,7 +97,7 @@ matriz multiplicarMatrizes(matriz mat1, matriz mat2) {
     }
 
     matResultado.colunas = mat2.colunas;
-    matResultado.vetor = mallocMem(sizeof(float) * mat1.linhas * mat2.colunas);
+    matResultado.vetor = allocMem(sizeof(float), mat1.linhas * mat2.colunas, "malloc", NULL);
     matResultado.linhas = mat1.linhas;
 
     for(cont = 0 ; cont < mat1.linhas ; cont += 1) {

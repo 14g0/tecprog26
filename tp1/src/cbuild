@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+CBUILD_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$CBUILD_ROOT/.env"
+source "$CBUILD_ROOT/utils/message.sh"
+source "$CBUILD_ROOT/utils/cli.sh"
+source "$CBUILD_ROOT/utils/log.sh" $@
+
+case "$1" in
+    build|run|clean|rebuild)
+        CBUILD_LOG_COMMAND="$1"
+        CBUILD_START_TIME="${EPOCHREALTIME/,/.}"
+        trap registrarLog EXIT
+    ;;
+esac
+
+case "$1" in
+    build) source "${CBUILD_ROOT}/commands/build.sh" $CLI_ARGS;;
+    run) source "${CBUILD_ROOT}/commands/run.sh" $CLI_ARGS;;
+    clean) source "${CBUILD_ROOT}/commands/clean.sh" $CLI_ARGS;;
+    rebuild) source "${CBUILD_ROOT}/commands/rebuild.sh" $CLI_ARGS;;
+    info) source "${CBUILD_ROOT}/commands/info.sh" $CLI_ARGS;;
+    test) source "${CBUILD_ROOT}/tests/test.sh" $CLI_ARGS;;
+    *)
+        printf "\033[37;1mOlá, essa é a CLI para a TP1 do Grupo 15\033[m\n\
+Comandos disponíveis:\n\
+    build   <diretório>: Compila o projeto e gera o executável.\n\
+    run     <diretório>: Executa o programa gerado a partir do projeto.\n\
+    clean   <diretório>: Remove arquivos temporários e objetos intermediários.\n\
+    rebuild <diretório>: Utiliza o \033[40;1m(clean)\033[m e compila o projeto novamente.\n\
+    info    <diretório>: Informa sobre estatísticas do projeto.\n"
+        exit 0
+    ;;
+esac
