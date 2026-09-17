@@ -4,7 +4,7 @@
 
 # FORMATO DE REGISTRO DO LOG:
 #   data de execução | tempo de execução | comando | codigoErro | flags
-#   0 para sucesso, mensagem de erro em falha
+#   Mensagem de erro (opcional)
 #   ===
 
 #-------------------------------------------------------------------------------
