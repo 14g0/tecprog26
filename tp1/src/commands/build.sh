@@ -1,35 +1,45 @@
 #!/usr/bin/env bash
 
-#TODO: Verficar permissões de escrita no diretório
-#TODO: Verificar permissões de leitura nos arquivos fonte
-
 #-------------------------------------------------------------------------------
 
 verificarEstruturaDoProjeto() {
+    local arquivo
     mensagemVerbose "Verificando Estrutura de Diretórios e Arquivos Fonte do Projeto"
 
-    if [[ ! -d $CBUILD_TARGET_DIR ]];
-        then saidaDeErro 101 "O diretório '$CBUILD_TARGET_DIR' não existe."
+    if [[ ! -d $CBUILD_TARGET_DIR ||
+          ! -w $CBUILD_TARGET_DIR ||
+          ! -r $CBUILD_TARGET_DIR ||
+          ! -x $CBUILD_TARGET_DIR
+    ]];
+            then saidaDeErro 101 "O diretório '$CBUILD_TARGET_DIR' não existe ou não possui permissões de acesso."
         else
             mensagemVerbose "Verificando se '$CBUILD_TARGET_DIR' contém a estrutura de diretórios esperada"
-            mensagemDebug "[[ ! -d "$CBUILD_TARGET_DIR/src" ]]"
-            [[ ! -d $CBUILD_TARGET_DIR/src ]] &&
-                saidaDeErro 102 "O diretório '$CBUILD_TARGET_DIR' não contém a estrutura de diretórios esperada.\n> $CBUILD_TARGET_DIR/src ausente."
-            
+            mensagemDebug "[[ ! -d $CBUILD_TARGET_DIR/src ]]"
+            if [[ ! -d "$CBUILD_TARGET_DIR/src" ]];
+                then 
+                    saidaDeErro 102 "O diretório '$CBUILD_TARGET_DIR' não contém a estrutura de diretórios esperada.\n> $CBUILD_TARGET_DIR/src ausente."
+                    elif [[ ! -r "$CBUILD_TARGET_DIR/src" || ! -x "$CBUILD_TARGET_DIR/src" ]];
+                        then saidaDeErro 110 "O diretório '$CBUILD_TARGET_DIR/src' não possui permissões de acesso."
+            fi
+
             mensagemVerbose "Verificando se '$CBUILD_TARGET_DIR/src' contém arquivos de código-fonte"
-            mensagemDebug "find "$CBUILD_TARGET_DIR/src/" -type f -name "*.h""
+            mensagemDebug "find $CBUILD_TARGET_DIR/src/ -type f -name "*.h""
             if [[ -n $(find "$CBUILD_TARGET_DIR/src/" -type f -name "*.c") ]];
                 then mensagemVerbose "Arquivos de código-fonte encontrados em '$CBUILD_TARGET_DIR/src'"
                 else saidaDeErro 103 "O diretório '$CBUILD_TARGET_DIR/src' não contém arquivos de código-fonte."
             fi
 
             mensagemVerbose "Verificando existência de '$CBUILD_TARGET_DIR/include'"
-            mensagemDebug "[[ ! -d "$CBUILD_TARGET_DIR/include" ]]"    
-            [[ ! -d $CBUILD_TARGET_DIR/include ]] &&
-                mensagemVerbose "Diretório '$CBUILD_TARGET_DIR/include' ausente" aviso sublinhado
+            mensagemDebug "[[ ! -d $CBUILD_TARGET_DIR/include ]]"    
+            if [[ ! -d "$CBUILD_TARGET_DIR/include" ]];
+                then mensagemVerbose "Diretório '$CBUILD_TARGET_DIR/include' ausente" aviso sublinhado
+
+                elif [[ ! -r "$CBUILD_TARGET_DIR/include" || ! -x "$CBUILD_TARGET_DIR/include" ]];
+                    then saidaDeErro 111 "O diretório '$CBUILD_TARGET_DIR/include' não possui permissões de leitura."
+            fi
 
             mensagemVerbose "Verificando existência de arquivos header em '$CBUILD_TARGET_DIR/include'"
-            mensagemDebug "find "$CBUILD_TARGET_DIR/include" -type f -name "*.h""
+            mensagemDebug "find $CBUILD_TARGET_DIR/include -type f -name "*.h""
             if [[ -n $(find "$CBUILD_TARGET_DIR/include" -type f -name "*.h") ]];
                 then mensagemVerbose "Arquivos header encontrados em '$CBUILD_TARGET_DIR/include'"
                 else mensagemVerbose "O diretório '$CBUILD_TARGET_DIR/include' não contém arquivos header" aviso sublinhado
@@ -62,7 +72,7 @@ validarFlagsCompilacao() {
     for indiceFlag in "${!COMMAND_FLAGS[@]}"; do
         flag="${COMMAND_FLAGS[$indiceFlag]}"
 
-        mensagemDebug "! printf 'int main(void){return 0;}' | gcc "$flag" -x c - -fsyntax-only >/dev/null 2>&1"
+        mensagemDebug "! printf 'int main(void){return 0;}' | gcc $flag -x c - -fsyntax-only >/dev/null 2>&1"
 
         # -x c: indica que o arquivo de entrada é C
         # - : lê o código-fonte do stdin
@@ -87,7 +97,7 @@ checarMtimeDependencias() {
 
     mensagemVerbose "Buscando dependências para '$arquivoObjeto' em '$arquivoDependencia'"
     mensagemDebug "mapfile -t arrayArquivosDependencia < <(\n \
-    grep -E '^[^[:space:]].*\.o:|^[[:space:]]+[^[:space:]]' "$arquivoDependencia" |\n \
+    grep -E '^[^[:space:]].*\.o:|^[[:space:]]+[^[:space:]]' $arquivoDependencia |\n \
     grep -oE '[^[:space:]]+\.(c|h)'\n \
 )"
     #[:space:] substitui \s no regex porque o primeiro é mais amplamente aceito no POSIX
@@ -120,18 +130,22 @@ gerarArquivosLinkedicao() {
     if [[ ! -d $CBUILD_TARGET_DIR/build ]];
         then
             mensagemVerbose "Criando diretório de build em '$CBUILD_TARGET_DIR/build'"
-            mensagemDebug "mkdir -p "$CBUILD_TARGET_DIR/build""
+            mensagemDebug "mkdir -p $CBUILD_TARGET_DIR/build"
             if mkdir -p "$CBUILD_TARGET_DIR/build";
                 then mensagemVerbose "Diretório de build criado com sucesso em '$CBUILD_TARGET_DIR/build'" sucesso
                 else saidaDeErro 104 "Falha ao criar diretório de build em '$CBUILD_TARGET_DIR/build'"
             fi
     fi
 
+    if [[ ! -w "$CBUILD_TARGET_DIR/build" || ! -x "$CBUILD_TARGET_DIR/build" ]]; then
+        saidaDeErro 112 "O diretório '$CBUILD_TARGET_DIR/build' não possui permissões de escrita."
+    fi
+
     mensagemVerbose "Verificando existência de '$CBUILD_TARGET_DIR/build/bin'"
     if [[ ! -d $CBUILD_TARGET_DIR/build/bin ]];
         then
             mensagemVerbose "Criando diretório de objetos em '$CBUILD_TARGET_DIR/build/bin'"
-            mensagemDebug "mkdir -p "$CBUILD_TARGET_DIR/build/bin""
+            mensagemDebug "mkdir -p $CBUILD_TARGET_DIR/build/bin"
             if mkdir -p "$CBUILD_TARGET_DIR/build/bin";
                 then mensagemVerbose "Diretório de objetos criado com sucesso em '$CBUILD_TARGET_DIR/build/bin'" sucesso
                 else saidaDeErro 105 "Falha ao criar diretório de objetos em '$CBUILD_TARGET_DIR/build/bin'"
@@ -142,7 +156,7 @@ gerarArquivosLinkedicao() {
     if [[ ! -d $CBUILD_TARGET_DIR/build/dependencies ]];
         then
             mensagemVerbose "Criando diretório de dependências em '$CBUILD_TARGET_DIR/build/dependencies'"
-            mensagemDebug "mkdir -p "$CBUILD_TARGET_DIR/build/dependencies""
+            mensagemDebug "mkdir -p $CBUILD_TARGET_DIR/build/dependencies"
             if mkdir -p "$CBUILD_TARGET_DIR/build/dependencies";
                 then mensagemVerbose "Diretório de dependências criado com sucesso em '$CBUILD_TARGET_DIR/build/dependencies'" sucesso
                 else saidaDeErro 106 "Falha ao criar diretório de dependências em '$CBUILD_TARGET_DIR/build/dependencies'"
@@ -150,7 +164,7 @@ gerarArquivosLinkedicao() {
     fi
 
     mensagemVerbose "Varrendo arquivos fonte para compilação em '$CBUILD_TARGET_DIR/src'"
-    mensagemDebug "mapfile -t arrayArquivosFonte < <(find "$CBUILD_TARGET_DIR/src" -name '*.c')"
+    mensagemDebug "mapfile -t arrayArquivosFonte < <(find $CBUILD_TARGET_DIR/src -name '*.c')"
 
     # <(...) é redirecionamento da saída de um comando como um arquivo, mesma ideia de $()
     mapfile -t arrayArquivosFonte  < <(
@@ -161,6 +175,9 @@ gerarArquivosLinkedicao() {
 
     verificarInstalacaoGcc
     for arquivoFonte in "${arrayArquivosFonte[@]}"; do
+          [[ ! -r "$arquivoFonte" ]] &&
+              saidaDeErro 112 "O arquivo fonte '$arquivoFonte' não possui permissões de leitura."
+
         arquivoObjeto="$CBUILD_TARGET_DIR/build/bin/$(basename "${arquivoFonte%.c}.o")"
         arquivoDependencia="$CBUILD_TARGET_DIR/build/dependencies/$(basename "${arquivoFonte%.c}.d")"
 
@@ -168,14 +185,14 @@ gerarArquivosLinkedicao() {
             then
                 mensagemVerbose "Arquivos de linkedição ausentes para '$arquivoFonte'" aviso
                 mensagemVerbose "Gerando arquivos de linkedição para '$arquivoFonte'"
-                mensagemDebug "gcc -c -Iinclude -MMD -MP -MF "$arquivoDependencia" "$arquivoFonte" -o "$arquivoObjeto" ${COMMAND_FLAGS[*]}"
+                mensagemDebug "gcc -c -Iinclude -MMD -MP -MF $arquivoDependencia $arquivoFonte -o $arquivoObjeto ${COMMAND_FLAGS[*]}"
 
                 # -c: compila o código-fonte para um arquivo objeto (.o), sem fazer a linkedição.
                 # -Iinclude: adiciona /include à lista de diretórios onde o GCC procura arquivos .h.
                 # -MMD: gera automaticamente dependências do arquivo, ignorando headers do sistema.
                 # -MP: cria alvos fictícios para headers, evitando erros se um header for removido.
                 # -MF arquivo: define onde o arquivo de dependências (.d) será salvo.
-                if gcc -c -Iinclude -MMD -MP -MF "$arquivoDependencia" "$arquivoFonte" -o "$arquivoObjeto" ${COMMAND_FLAGS[*]};
+                if gcc -c -Iinclude -MMD -MP -MF "$arquivoDependencia" "$arquivoFonte" -o "$arquivoObjeto" "${COMMAND_FLAGS[@]}";
                     then
                         mensagemVerbose "Arquivos de linkedição gerados com sucesso para '$arquivoFonte'" sucesso 1
                     else
