@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+#TODO: Verficar permissões de escrita no diretório
+#TODO: Verificar permissões de leitura nos arquivos fonte
+
 #-------------------------------------------------------------------------------
 
 verificarEstruturaDoProjeto() {
@@ -38,12 +41,24 @@ verificarEstruturaDoProjeto() {
 
 #-------------------------------------------------------------------------------
 
+verificarInstalacaoGcc() {
+    mensagemVerbose "Verificando se o gcc está instalado e disponível no PATH do sistema"
+    mensagemDebug "command -v gcc >/dev/null 2>&1"
+    if ! command -v gcc >/dev/null 2>&1;
+        then saidaDeErro 100 "O compilador GCC não está instalado ou não está no PATH do sistema."
+    fi
+    mensagemComando "-GCC verificado com sucesso"
+}
+
+#-------------------------------------------------------------------------------
+
 validarFlagsCompilacao() {
     local flag
     local indiceFlag
 
     mensagemVerbose "Validando flags de compilação passadas via CLI"
 
+    verificarInstalacaoGcc
     for indiceFlag in "${!COMMAND_FLAGS[@]}"; do
         flag="${COMMAND_FLAGS[$indiceFlag]}"
 
@@ -144,6 +159,7 @@ gerarArquivosLinkedicao() {
     (( ${#arrayArquivosFonte[@]} < 1 )) && \
         saidaDeErro 107 "Nenhum arquivo fonte encontrado em '$CBUILD_TARGET_DIR/src'"
 
+    verificarInstalacaoGcc
     for arquivoFonte in "${arrayArquivosFonte[@]}"; do
         arquivoObjeto="$CBUILD_TARGET_DIR/build/bin/$(basename "${arquivoFonte%.c}.o")"
         arquivoDependencia="$CBUILD_TARGET_DIR/build/dependencies/$(basename "${arquivoFonte%.c}.d")"
@@ -200,6 +216,7 @@ linkeditarArquivos() {
     mensagemVerbose "Linkeditando arquivos objeto em '$CBUILD_TARGET_DIR/build/bin'"
     mensagemDebug "gcc -o $CBUILD_TARGET_DIR/build/$(dirname "$CBUILD_TARGET_DIR") ${arrayArquivosObjeto[*]}"
 
+    verificarInstalacaoGcc
     if ! gcc -o "$CBUILD_TARGET_DIR/build/$(basename "$CBUILD_TARGET_DIR").exe" "${arrayArquivosObjeto[@]}";
         then
             rm -f "$CBUILD_TARGET_DIR/build/$(basename "$CBUILD_TARGET_DIR").exe"
