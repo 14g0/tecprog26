@@ -24,11 +24,11 @@ case "$1" in
     *)
         printf "\033[37;1mOlá, essa é a CLI para a TP1 do Grupo 15\033[m\n\
 Comandos disponíveis:\n\
-    build   <diretório>: Compila o projeto e gera o executável.\n\
-    run     <diretório>: Executa o programa gerado a partir do projeto.\n\
-    clean   <diretório>: Remove arquivos temporários e objetos intermediários.\n\
-    rebuild <diretório>: Utiliza o \033[40;1m(clean)\033[m e compila o projeto novamente.\n\
-    info    <diretório>: Informa sobre estatísticas do projeto.\n"
+    \033[32;1mbuild\033[m   \033[4m<diretório>\033[m \033[33m<flags gcc>\033[m                    : Compila o projeto e gera o executável.\n\
+    \033[32;1mrebuild\033[m \033[4m<diretório>\033[m \033[33m<flags gcc>\033[m                    : Utiliza o \033[40;1m(clean)\033[m e compila o projeto novamente.\n\
+    \033[32;1mrun\033[m     \033[4m<diretório>\033[m                                : Executa o programa gerado a partir do projeto.\n\
+    \033[32;1mclean\033[m   \033[4m<diretório>\033[m                                : Remove arquivos temporários e objetos intermediários.\n\
+    \033[32;1minfo\033[m    \033[4m<diretório>\033[m -\033[33m<comando>\033[m -\033[33m<código de saída>\033[m  : Informa sobre estatísticas do projeto.\n"
         exit 0
     ;;
 esac
