@@ -201,4 +201,4 @@ validarFlagsInformacao
 {
     contabilizarEstatisticasProjeto
     mostrarLog
-} | less -R # -R permite cor ansi no less
+} | less -RX # -R permite cor ansi; -X preserva a tela ao sair
