@@ -20,7 +20,7 @@ case "$1" in
     clean) source "${CBUILD_ROOT}/commands/clean.sh" $CLI_ARGS;;
     rebuild) source "${CBUILD_ROOT}/commands/rebuild.sh" $CLI_ARGS;;
     info) source "${CBUILD_ROOT}/commands/info.sh" $CLI_ARGS;;
-    test) source "${CBUILD_ROOT}/tests/test.sh" $CLI_ARGS;;
+    #test) source "${CBUILD_ROOT}/tests/test.sh" $CLI_ARGS;; 
     *)
         printf "\033[37;1mOlá, essa é a CLI para a TP1 do Grupo 15\033[m\n\
 Comandos disponíveis:\n\
