@@ -26,15 +26,24 @@ modificarFlagsCLI() { # $Array(flags)
 #-------------------------------------------------------------------------------
 
 importarArquivoConfig() {
+    [[ ! -r "$CBUILD_TARGET_DIR/.config" ]] &&
+        saidaDeErro 304 "O arquivo de configuração '$CBUILD_TARGET_DIR/.config' não é legível."
+
     local configVar
     local linhaExecutavel
+    local valorConfig
 
     imprimirMensagem ".CONFIG encontrado no diretório do projeto " "sucesso" "1"
 
     for configVar in "${CBUILD_ALLOWED_CONFIG_VARS_ARRAY[@]}"; do
-        linhaExecutavel="$(grep -E "^$configVar=" "$1")"
+        linhaExecutavel="$(grep -E "^$configVar=" "$CBUILD_TARGET_DIR/.config")"
         if [[ -n "$linhaExecutavel" ]]; then
-            printf -v "$configVar" "%s" "${linhaExecutavel#*=}"
+            valorConfig="${linhaExecutavel#*=}"
+            if [[ $configVar == COMMAND_FLAGS ]]; then
+                read -r -a COMMAND_FLAGS <<< "$valorConfig"
+            else
+                printf -v "$configVar" "%s" "$valorConfig"
+            fi
         fi
     done
 
@@ -61,16 +70,20 @@ validarCLI() {
                 if ((quantidadeDiretorios > 1)); then
                     saidaDeErro 302 "Apenas um diretório de destino é permitido."
                 fi
-                CBUILD_TARGET_DIR="$(realpath ${argumento:-.})"
+                CBUILD_TARGET_DIR="$(realpath "${argumento:-.}")"
         fi
     done
 
     [[ -z "$CBUILD_TARGET_DIR" ]] && CBUILD_TARGET_DIR="$(realpath .)"
 
-    configPath="$CBUILD_TARGET_DIR/.config"
-    if [[ -f "$configPath" ]];
+    [[  
+        ! -d "$CBUILD_TARGET_DIR" ||
+        ! -x "$CBUILD_TARGET_DIR"
+    ]] && saidaDeErro 303 "O diretório de destino '$CBUILD_TARGET_DIR' não existe."
+
+    if [[ -f "$CBUILD_TARGET_DIR/.config" ]];
         then
-            importarArquivoConfig "$configPath"
+            importarArquivoConfig
         else
             modificarFlagsCLI "${flagsCLI[@]}"
     fi
